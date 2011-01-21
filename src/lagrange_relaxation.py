@@ -45,6 +45,9 @@ class Relaxation:
                     if lineOne['ct'] < lineTwo['ct']: # line one rules 
                         lineTwo['u'] = 0
                         lineTwo['l'] = 0  
+                    else:
+                        lineOne['u'] = 0
+                        lineOne['l'] = 0
                     
                     
             point = self.intersection(machineOne, machineTwo)
@@ -54,15 +57,30 @@ class Relaxation:
             point = self.intersection(idle, machineTwo)
             adjustBorders(point, idle, machineTwo)
             
-            print machineOne
-            print machineTwo
-            print idle
-            print "============================================="
-            
-             
+            Li = {'mO': machineOne, 'mT': machineTwo, 'idle': idle}
+            self.L.append(Li)
+            self.plotLi(i, "L"+str(i+1), "L"+str(i+1))
+    
                     
                     
-            
+    def plotLi(self, i = 0, name = "L", caption = "L"):
+        import matplotlib.pyplot as plt
+        import numpy as np
+        
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.set_title(caption)
+        
+        for line in self.L[i].values():
+            if not line['u'] == line['l']:
+                
+                if line['u'] == float("inf"): 
+                    line['u'] = line['l']+5
+                    
+                t = np.arange(line['l'], line['u'], 0.01)
+                plt.plot(t, line['ct']+line['mi']*t)
+        
+        plt.savefig(name)
         
     def plotLagrangian(self):
         import matplotlib.pyplot as plt
