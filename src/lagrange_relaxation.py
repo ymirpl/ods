@@ -8,7 +8,7 @@ class Relaxation:
     p = [[2, 3], [1, 2], [1, 2], [3, 1], [1, 2], [1, 2], [2, 3], [4, 3], [2, 1], [4, 2]]
     L = []
     peaks = []
-    Q = 15
+    Q = 27
     x = [[0 for i in range(2)] for j in range(10)]
     v = [[0 for i in range(2)] for j in range(10)]
 
@@ -59,9 +59,11 @@ class Relaxation:
             self.plotLi(Li, "L"+str(i+1), "L"+str(i+1))
             
     def maximizeMi(self):
-        maxMi = float("-inf")
-        miList = []
+        maxLd = float("-inf")
+        LdList = []
         
+        import numpy as np
+        # self.peaks = np.arange(0, 30, 0.01) 
         for x in self.peaks:
             localX = [[0 for i in range(2)] for j in range(10)]
             localV = [[0 for i in range(2)] for j in range(10)]
@@ -70,7 +72,7 @@ class Relaxation:
             mi = self.Lzero['idle']['mi']
             for i, l in enumerate(self.L):
                 for (k,v) in l.items():
-                    if v['l'] <= x < v['u']:
+                    if v['l'] < x <= v['u']:
                         mi += v['mi']
                         ct += v['ct']
                         
@@ -82,28 +84,39 @@ class Relaxation:
                             localV[i][1] = 1
                         else: #idle
                             localV[i][0] = 1
-            miValue = ct + mi*x
-            miList.append(miValue)
-            print "mi ", miValue
-            if miValue >= maxMi:
-                maxMi = miValue
+          
+            LdValue = ct + mi*x
+            LdList.append(LdValue)
+            if LdValue >= maxLd:
+                maxLd = LdValue
+                maxArg = x
                 self.x = localX
                 self.v = localV
         
+        
+        print "mi ", maxArg
+        print "Ld ", maxLd
         print "x ", self.x
         print "v ", self.v
-        self.plotDual(miList)
+        
+        
+        
+        self.plotDual(LdList)
                     
                     
     
                     
-    def plotDual(self, miList):
+    def plotDual(self, LdList):
         import matplotlib.pyplot as plt
         fig = plt.figure()
         ax = fig.add_subplot(111)
         ax.grid(True)
         
-        plt.plot(self.peaks, miList, 'r*')
+        zipped = zip(self.peaks, LdList)
+        zipped = sorted(zipped, key = lambda x: x[0])
+        self.peaks, LdList = zip(*zipped)
+        
+        plt.plot(self.peaks, LdList, 'b-')
         plt.savefig("dual")
         
                         
@@ -119,10 +132,9 @@ class Relaxation:
         for line in function.values():
             if not line['u'] == line['l']:
                 
-                if line['u'] == float("inf"): 
-                    line['u'] = line['l']+5
+                upperLimit = line['l']+5 if line['u'] == float("inf") else line['u'] 
                     
-                t = np.arange(line['l'], line['u'], 0.01)
+                t = np.arange(line['l'], upperLimit, 0.01)
                 plt.plot(t, line['ct']+line['mi']*t)
         
         plt.savefig(name)
