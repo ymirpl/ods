@@ -8,7 +8,7 @@ class Relaxation:
     p = [[2, 3], [1, 2], [1, 2], [3, 1], [1, 2], [1, 2], [2, 3], [4, 3], [2, 1], [4, 2]]
     L = []
     peaks = []
-    Q = 27
+    Q = 29
     x = [[0 for i in range(2)] for j in range(10)]
     v = [[0 for i in range(2)] for j in range(10)]
 
@@ -102,8 +102,41 @@ class Relaxation:
         
         
         self.plotDual(LdList)
+
+        while self.quality()[1] > self.Q:
+            self.makePerturbation(maxArg)
                     
-                    
+    def quality(self):
+        profit = 0
+        usage = 0
+        
+        for i in self.n:
+            for j in range(2):
+                if self.v[i][j]:
+                    profit += self.s
+                    usage += self.e
+                profit -= self.c[i][j]*self.x[i][j]
+                usage += self.p[i][j]*self.x[i][j]
+        
+        print "Profit: ", profit
+        print "Usage: ", usage
+        
+        return (profit, usage)  
+    
+    def makePerturbation(self, mi):
+        # we choose element, which gives least gain
+        maxL = float("-inf")
+        maxArg = tuple()
+        for i in self.n:
+            for j in range(2):
+                if self.x[i][j] > 0:
+                    L = self.s - self.c[i][j]*self.x[i][j] + mi*(self.e + self.x[i][j]) # TODO
+                    if L > maxL: 
+                        maxL = L
+                        maxArg = (i, j)
+                        
+        self.x[maxArg[0]][maxArg[1]] -= 1 # perform permutation
+                           
     
                     
     def plotDual(self, LdList):
