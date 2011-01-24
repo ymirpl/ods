@@ -76,8 +76,8 @@ class Relaxation:
         # import numpy as np
         # self.peaks = np.arange(0, 30, 0.01) 
         for x in self.peaks:
-            localX = [[0 for i in range(2)] for j in range(10)]
-            localV = [[0 for i in range(2)] for j in range(10)]
+            localX = [[0 for i in range(2)] for j in range(len(self.n))]
+            localV = [[0 for i in range(2)] for j in range(len(self.n))]
             
             ct = 0
             mi = self.Lzero['idle']['mi']
@@ -86,6 +86,7 @@ class Relaxation:
                     if v['l'] < x <= v['u']:
                         mi += v['mi']
                         ct += v['ct']
+                        print i
                         
                         if k == 'mO':
                             localX[i][0] = self.M[i]
@@ -133,8 +134,8 @@ class Relaxation:
                 usage += self.p[i][j]*self.x[i][j]
         
         print "Solution: "
-        print "x: ", self.x
-        print "v: ", self.v
+#        print "x: ", self.x
+#        print "v: ", self.v
         print "Profit: ", profit
         print "Usage: ", usage, "Q: ", self.Q
         
